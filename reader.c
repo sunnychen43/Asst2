@@ -7,6 +7,77 @@
 #include <fcntl.h>
 
 
+/*------------------------------HASHTABLE-------------------------------------*/
+
+#define HASHSIZE 53
+typedef struct HashItem {
+	char *val;
+    int freq;
+    struct HashItem *next;
+} HashItem;
+
+static HashItem *ht_table[HASHSIZE];
+
+
+/* djb2 hash function for strings by dan bernstein */
+int _hash(const char *s) {
+    unsigned long hash = 5381;
+    int c;
+
+    while ((c = *s++)) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+    return hash % HASHSIZE;
+}
+
+HashItem *ht_lookup(const char *s) {
+	HashItem *ptr = ht_table[_hash(s)];
+	for (; ptr != NULL; ptr = ptr->next) {
+		if (strcmp(s, ptr->val) == 0) {
+			return ptr;
+		}
+	}
+	return NULL;
+}
+
+void ht_add(const char *s) {
+    if (s == NULL) {return;}
+
+    HashItem *ptr = ht_lookup(s);
+    if (ptr == NULL) {  // not found
+        HashItem *new_item = malloc(sizeof(HashItem));
+        new_item->val = malloc(strlen(s)+1);
+        strcpy(new_item->val, s);
+        new_item->freq = 1;
+
+        int hashval = _hash(s);
+        new_item->next = ht_table[hashval];
+        ht_table[hashval] = new_item;
+    }
+
+    else {
+        ptr->freq++;
+    }
+}
+
+void ht_free() {
+	for (int i=0; i < HASHSIZE; i++) {
+		HashItem *tmp, *p = ht_table[i];
+		while (p != NULL) {
+			tmp = p->next;
+			free(p->val);
+			free(p);
+			p = tmp;
+		}
+	}
+}
+
+void ht_read_all() {
+    for (int i=0; i < HASHSIZE; i++) {
+        
+    }
+}
+
 typedef struct Token {
     char *token;
     size_t size;
@@ -30,7 +101,6 @@ char *tok_to_string (Token *tok) {
 
     // set null terminator
     tok->token[tok->index] = 0;
-
     char *s = malloc(tok->index+2);
     strcpy(s, tok->token);
     return s;
@@ -59,28 +129,26 @@ void read_file(const char *filename) {
             // check for delim
             if (buf[i] == ' ' || buf[i] == '\n') {
                 char *s = tok_to_string(&tok);
-                if (s != NULL) {
-                    printf("%s\n", s);
-                }
+                ht_add(s);
                 tok_clear(&tok);
                 continue;
             }
+
             // check for punctuation
-            if (!isalnum(buf[i])) {continue;}
-            
-            tok_insert_char(&tok, buf[i]);
+            if (isalpha(buf[i]) || buf[i] == '-') {
+                tok_insert_char(&tok, tolower(buf[i]));
+            }
         }
 
     } while (bytes_read == 1024);
 
     char *s = tok_to_string(&tok);
-    if (s != NULL) {
-        printf("%s\n", s);
-    }
+    ht_add(s);
 
     close(fd);
 }
 
 int main() {
     read_file("test.txt");
+    printf("%d\n", ht_lookup("dog")->freq);
 }

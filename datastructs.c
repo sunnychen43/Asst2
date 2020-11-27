@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// should change to another name, i use a struct called token in reader.c
 typedef struct word_token {
     struct word_token* next;
     double freq; //frequency of token in file
@@ -17,7 +18,7 @@ typedef struct file_token {
 
 /* FREQUENCY CHAIN */
 
-word_token* insert_word (word_token* freq_list, char* str, int freq) {
+word_token* insert_word(word_token* freq_list, char* str, int freq) {
     word_token* list = freq_list;
     // first element
     if (list == NULL || strcmp(str, list->word) < 0) {
@@ -46,7 +47,7 @@ word_token* insert_word (word_token* freq_list, char* str, int freq) {
     return freq_list;
 }
 
-void print_list (word_token* list) {
+void print_list(word_token* list) {
     if (list == NULL) {
         printf("Empty list\n");
     }
@@ -59,7 +60,7 @@ void print_list (word_token* list) {
 
 /* FILE FREQUENCY */
 
-file_token* insert_file (file_token* file_list, word_token* word_list, char* str, int total) {
+file_token* insert_file(file_token* file_list, word_token* word_list, char* str, int total) {
     file_token* list = file_list;
     // first element
     if (list == NULL) {
@@ -82,7 +83,7 @@ file_token* insert_file (file_token* file_list, word_token* word_list, char* str
     return file_list;
 }
 
-void print_file (file_token* list) {
+void print_file(file_token* list) {
     if (list == NULL) {
         printf("Empty list\n");
     }
