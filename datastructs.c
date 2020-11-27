@@ -19,29 +19,27 @@ typedef struct file_token {
 /* FREQUENCY CHAIN */
 
 void insert_word (word_token** freq_list, const char* input, double freq) {
-    char* str = malloc(sizeof(input));
-    strcpy (str, input);
-    word_token* list = *freq_list;
     word_token* new_token = (word_token*)malloc(sizeof(word_token));
     new_token->freq = freq;
-    new_token->word = str;
+    new_token->word = malloc(strlen(input)+1);
+    strcpy(new_token->word, input);
+
+    word_token* list = *freq_list;
     // first element
-    if (list == NULL || strcmp(str, list->word) < 0) {
+    if (list == NULL || strcmp(input, list->word) < 0) {
         new_token->next = list;
         *freq_list = new_token;
         return;
     }
+
     while (list->next != NULL) {
-        if (strcmp(str, (list->next)->word) < 0) {
-            new_token->next = list->next;
-            list->next = new_token;
-            return;
+        if (strcmp(input, (list->next)->word) < 0) {
+            break;
         }
         list = list->next;
     }
+    new_token->next = list->next;
     list->next = new_token;
-    new_token->next = NULL;
-    return;
 }
 
 void print_list(word_token* list) {
@@ -58,25 +56,24 @@ void print_list(word_token* list) {
 /* FILE FREQUENCY */
 
 void insert_file (file_token** file_list, word_token* word_list, char* input, double total) {
-    char* str = malloc(sizeof(input));
-    strcpy (str, input);
-    file_token* list = *file_list;
     file_token* new_token = (file_token*)malloc(sizeof(file_token));
     new_token->freq_chain = word_list;
     new_token->total = total;
-    new_token->file_name = str;
+    new_token->file_name = malloc(strlen(input)+1);
+    strcpy(new_token->file_name, input);
+    new_token->next = NULL;
+
+    file_token* list = *file_list;
     // first element
     if (list == NULL) {
-        new_token->next = list;
         *file_list = new_token;
         return;
     }
+
     while (list->next != NULL) {
         list = list->next;
     }
     list->next = new_token;
-    new_token->next = NULL;
-    return;
 }
 
 void print_file(file_token* list) {
@@ -84,10 +81,10 @@ void print_file(file_token* list) {
         printf("Empty list\n");
     }
     while (list->next != NULL) {
-        print_list(&(list->freq_chain));
+        print_list(list->freq_chain);
         list = list->next;
     }
-    print_list(&(list->freq_chain));
+    print_list(list->freq_chain);
 }
 
 int main() {
@@ -126,5 +123,5 @@ int main() {
     insert_word(t1, word5, 1);
     insert_word(t1, word6, 1);
     insert_file(f1, t, word1, 1);
-    print_file(f1);
+    print_file(f);
 }
