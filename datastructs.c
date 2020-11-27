@@ -17,36 +17,34 @@ typedef struct file_token {
 
 /* FREQUENCY CHAIN */
 
-word_token* insert_word (word_token* freq_list, char* str, int freq) {
-    word_token* list = freq_list;
+void insert_word (word_token** freq_list, const char* input, double freq) {
+    char* str = malloc(sizeof(input));
+    strcpy (str, input);
+    word_token* list = *freq_list;
+    word_token* new_token = (word_token*)malloc(sizeof(word_token));
+    new_token->freq = freq;
+    new_token->word = str;
     // first element
     if (list == NULL || strcmp(str, list->word) < 0) {
-        word_token* new_token = (word_token*)malloc(sizeof(word_token));
         new_token->next = list;
-        new_token->freq = freq;
-        new_token->word = str;
-        return new_token;
+        *freq_list = new_token;
+        return;
     }
     while (list->next != NULL) {
         if (strcmp(str, (list->next)->word) < 0) {
-            word_token* new_token = (word_token*)malloc(sizeof(word_token));
             new_token->next = list->next;
-            new_token->freq = freq;
-            new_token->word = str;
             list->next = new_token;
-            return list;
+            return;
         }
         list = list->next;
     }
-    word_token* new_token = (word_token*)malloc(sizeof(word_token));
-    new_token->next = list->next;
-    new_token->freq = freq;
-    new_token->word = str;
     list->next = new_token;
-    return freq_list;
+    new_token->next = NULL;
+    return;
 }
 
-void print_list (word_token* list) {
+void print_list (word_token** input) {
+    word_token* list = *input;
     if (list == NULL) {
         printf("Empty list\n");
     }
@@ -59,38 +57,38 @@ void print_list (word_token* list) {
 
 /* FILE FREQUENCY */
 
-file_token* insert_file (file_token* file_list, word_token* word_list, char* str, int total) {
-    file_token* list = file_list;
+void insert_file (file_token** file_list, word_token* word_list, char* input, double total) {
+    char* str = malloc(sizeof(input));
+    strcpy (str, input);
+    file_token* list = *file_list;
+    file_token* new_token = (file_token*)malloc(sizeof(file_token));
+    new_token->freq_chain = word_list;
+    new_token->total = total;
+    new_token->file_name = str;
     // first element
     if (list == NULL) {
-        file_token* new_token = (file_token*)malloc(sizeof(file_token));
         new_token->next = list;
-        new_token->freq_chain = word_list;
-        new_token->total = total;
-        new_token->file_name = str;
-        return new_token;
+        *file_list = new_token;
+        return;
     }
     while (list->next != NULL) {
         list = list->next;
     }
-    file_token* new_token = (file_token*)malloc(sizeof(file_token));
-    new_token->next = list->next;
-    new_token->freq_chain = word_list;
-    new_token->total = total;
-    new_token->file_name = str;
     list->next = new_token;
-    return file_list;
+    new_token->next = NULL;
+    return;
 }
 
-void print_file (file_token* list) {
+void print_file (file_token** input) {
+    file_token* list = *input;
     if (list == NULL) {
         printf("Empty list\n");
     }
     while (list->next != NULL) {
-        print_list(list->freq_chain);
+        print_list(&(list->freq_chain));
         list = list->next;
     }
-    print_list(list->freq_chain);
+    print_list(&(list->freq_chain));
 }
 
 int main() {
@@ -102,7 +100,11 @@ int main() {
     char* word3 = "sun";
     char* word4 = "abc";
     char* word5 = "hel";
-    word_token* t1 = NULL;
+    char* word6 = "iota";
+    word_token* t = NULL;
+    word_token** t1 = &t;
+    file_token* f = NULL;
+    file_token** f1 = &f;
     // if (t1 == NULL) {
     //     t1 = (word_token*)malloc(sizeof(word_token));
     //     t1->word = word1;
@@ -118,11 +120,12 @@ int main() {
     // t1->word = word1;
     // t2->word = word2;
     // t3->word = word3;
-    t1 = insert_word(t1, word1, 1);
-    t1 = insert_word(t1, word2, 1);
-    t1 = insert_word(t1, word4, 1);
-    t1 = insert_word(t1, word3, 1);
-    t1 = insert_word(t1, word5, 1);
-    print_list(t1);
-    return 0;
+    insert_word(t1, word1, 1);
+    insert_word(t1, word2, 1);
+    insert_word(t1, word4, 1);
+    insert_word(t1, word3, 1);
+    insert_word(t1, word5, 1);
+    insert_word(t1, word6, 1);
+    insert_file(f1, t, word1, 1);
+    print_file(f1);
 }
