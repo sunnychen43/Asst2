@@ -13,7 +13,7 @@ typedef struct file_token {
     struct word_token* freq_chain;
     struct file_token* next;
     char* file_name;
-    double total; //number of tokens
+    int total; //number of tokens
 } file_token;
 
 /* FREQUENCY CHAIN */
@@ -43,19 +43,15 @@ void insert_word (word_token** freq_list, const char* input, double freq) {
 }
 
 void print_list(word_token* list) {
-    if (list == NULL) {
-        printf("Empty list\n");
-    }
-    while (list->next != NULL) {
-        printf("%s\n", list->word);
+    while (list != NULL) {
+        printf("%s: %f\n", list->word, list->freq);
         list = list->next;
     }
-    printf("%s\n", list->word);
 }
 
 /* FILE FREQUENCY */
 
-void insert_file (file_token** file_list, word_token* word_list, char* input, double total) {
+void insert_file (file_token** file_list, word_token* word_list, char* input, int total) {
     file_token* new_token = (file_token*)malloc(sizeof(file_token));
     new_token->freq_chain = word_list;
     new_token->total = total;
@@ -77,51 +73,9 @@ void insert_file (file_token** file_list, word_token* word_list, char* input, do
 }
 
 void print_file(file_token* list) {
-    if (list == NULL) {
-        printf("Empty list\n");
-    }
-    while (list->next != NULL) {
+    while (list != NULL) {
+        printf("%s\n", list->file_name);
         print_list(list->freq_chain);
         list = list->next;
     }
-    print_list(list->freq_chain);
-}
-
-int main() {
-    // word_token* t1 = (word_token*)malloc(sizeof(word_token));
-    // word_token* t2 = (word_token*)malloc(sizeof(word_token));
-    // word_token* t3 = (word_token*)malloc(sizeof(word_token));
-    char* word1 = "hello";
-    char* word2 = "shine";
-    char* word3 = "sun";
-    char* word4 = "abc";
-    char* word5 = "hel";
-    char* word6 = "iota";
-    word_token* t = NULL;
-    word_token** t1 = &t;
-    file_token* f = NULL;
-    file_token** f1 = &f;
-    // if (t1 == NULL) {
-    //     t1 = (word_token*)malloc(sizeof(word_token));
-    //     t1->word = word1;
-    //     t1->freq = 1;
-    //     t1->next = NULL;
-    // }
-    // t1->next = t2;
-    // t2->next = t3;
-    // t3->next = NULL;
-    // t1->freq = 1;
-    // t2->freq = 1;
-    // t3->freq = 1;
-    // t1->word = word1;
-    // t2->word = word2;
-    // t3->word = word3;
-    insert_word(t1, word1, 1);
-    insert_word(t1, word2, 1);
-    insert_word(t1, word4, 1);
-    insert_word(t1, word3, 1);
-    insert_word(t1, word5, 1);
-    insert_word(t1, word6, 1);
-    insert_file(f1, t, word1, 1);
-    print_file(f);
 }

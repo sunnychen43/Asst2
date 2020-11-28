@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include "datastructs.c"
 
 
 /*------------------------------HASHTABLE-------------------------------------*/
@@ -72,10 +73,18 @@ void ht_free() {
 	}
 }
 
-void ht_read_all() {
+word_token *ht_read_all(int total) {
+    word_token *freq_list = NULL;
+
     for (int i=0; i < HASHSIZE; i++) {
-        
+        HashItem *curr = ht_table[i];
+        while (curr != NULL) {
+            insert_word(&freq_list, curr->val, ((double)curr->freq)/total);
+            curr = curr->next;
+        }
     }
+
+    return freq_list;
 }
 
 typedef struct Token {
@@ -111,11 +120,12 @@ void tok_clear (Token *tok) {
     tok->index = 0;
 }
 
-void read_file(const char *filename) {
+int read_file(const char *filename) {
     int fd = open(filename, O_RDONLY);
 
     char buf[1024];
     int bytes_read;
+    int count = 0;
 
     Token tok;
     tok.token = malloc(128);
@@ -129,11 +139,13 @@ void read_file(const char *filename) {
             // check for delim
             if (buf[i] == ' ' || buf[i] == '\n') {
                 char *s = tok_to_string(&tok);
-                ht_add(s);
+                if (s != NULL) {
+                    ht_add(s);
+                    count++;
+                }
                 tok_clear(&tok);
                 continue;
             }
-
             // check for punctuation
             if (isalpha(buf[i]) || buf[i] == '-') {
                 tok_insert_char(&tok, tolower(buf[i]));
@@ -143,12 +155,23 @@ void read_file(const char *filename) {
     } while (bytes_read == 1024);
 
     char *s = tok_to_string(&tok);
-    ht_add(s);
-
+    if (s != NULL) {
+        ht_add(s);
+        count++;
+    }
     close(fd);
+
+    return count;
 }
 
+static file_token *master;
+
 int main() {
-    read_file("test.txt");
-    printf("%d\n", ht_lookup("dog")->freq);
+    int count = read_file("test.txt");
+    printf("%d\n", count);
+
+    word_token *p = ht_read_all(count);
+    insert_file(&master, p, "test.txt", count);
+
+    print_file(master);
 }
