@@ -73,8 +73,8 @@ void ht_free() {
 	}
 }
 
-word_token *ht_read_all(int total) {
-    word_token *freq_list = NULL;
+TokenList *ht_read_all(int total) {
+    TokenList *freq_list = NULL;
 
     for (int i=0; i < HASHSIZE; i++) {
         HashItem *curr = ht_table[i];
@@ -164,13 +164,13 @@ int read_file(const char *filename) {
     return count;
 }
 
-static file_token *master;
+static FileList *master;
 
 int main() {
     int count = read_file("test.txt");
     printf("%d\n", count);
 
-    word_token *p = ht_read_all(count);
+    TokenList *p = ht_read_all(count);
     insert_file(&master, p, "test.txt", count);
 
     print_file(master);

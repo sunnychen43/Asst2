@@ -12,99 +12,17 @@ Output in order from smallest to largest number of tokens
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-// should change to another name, i use a struct called token in reader.c
-typedef struct word_token {
-    struct word_token* next;
-    double freq; //frequency of token in file
-    char* word;
-} word_token;
-
-typedef struct file_token {
-    struct word_token* freq_chain;
-    struct file_token* next;
-    char* file_name;
-    double total; //number of tokens
-} file_token;
+#include "datastructs.c"
 
 /* FREQUENCY CHAIN */
 
-void insert_word (word_token** freq_list, const char* input, double freq) {
-    word_token* new_token = (word_token*)malloc(sizeof(word_token));
-    new_token->freq = freq;
-    new_token->word = malloc(strlen(input)+1);
-    strcpy(new_token->word, input);
+TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
 
-    word_token* list = *freq_list;
-    // first element
-    if (list == NULL || strcmp(input, list->word) < 0) {
-        new_token->next = list;
-        *freq_list = new_token;
-        return;
-    }
-
-    while (list->next != NULL) {
-        if (strcmp(input, (list->next)->word) < 0) {
-            break;
-        }
-        list = list->next;
-    }
-    new_token->next = list->next;
-    list->next = new_token;
-}
-
-void print_list(word_token* list) {
-    if (list == NULL) {
-        printf("Empty list\n");
-    }
-    while (list->next != NULL) {
-        printf("%s %f\n", list->word, list->freq);
-        list = list->next;
-    }
-    printf("%s %f\n", list->word, list->freq);
-}
-
-/* FILE FREQUENCY */
-
-void insert_file (file_token** file_list, word_token* word_list, char* input, double total) {
-    file_token* new_token = (file_token*)malloc(sizeof(file_token));
-    new_token->freq_chain = word_list;
-    new_token->total = total;
-    new_token->file_name = malloc(strlen(input)+1);
-    strcpy(new_token->file_name, input);
-    new_token->next = NULL;
-
-    file_token* list = *file_list;
-    // first element
-    if (list == NULL) {
-        *file_list = new_token;
-        return;
-    }
-
-    while (list->next != NULL) {
-        list = list->next;
-    }
-    list->next = new_token;
-}
-
-void print_file(file_token* list) {
-    if (list == NULL) {
-        printf("Empty list\n");
-    }
-    while (list->next != NULL) {
-        print_list(list->freq_chain);
-        list = list->next;
-    }
-    print_list(list->freq_chain);
-}
-
-word_token *mean_dist(word_token* list_1, word_token* list_2) {
-
-    word_token* avg_list = malloc(sizeof(word_token));
-    word_token* curr = avg_list;
+    TokenList* avg_list = malloc(sizeof(TokenList));
+    TokenList* curr = avg_list;
 
     while (list_1 != NULL && list_2 != NULL) {
-        word_token* new_token = malloc(sizeof(word_token));
+        TokenList* new_token = malloc(sizeof(TokenList));
         new_token->next = NULL;
 
         if (strcmp(list_1->word, list_2->word) < 0) {
@@ -134,7 +52,7 @@ word_token *mean_dist(word_token* list_1, word_token* list_2) {
     }
 
     while (list_1 != NULL) {
-        word_token* new_token = malloc(sizeof(word_token));
+        TokenList* new_token = malloc(sizeof(TokenList));
         new_token->next = NULL;
         new_token->freq = list_1->freq/2;
         new_token->word = list_1->word;
@@ -145,7 +63,7 @@ word_token *mean_dist(word_token* list_1, word_token* list_2) {
         curr = curr->next;
     }
     while (list_2 != NULL) {
-        word_token* new_token = (word_token*)malloc(sizeof(word_token));
+        TokenList* new_token = (TokenList*)malloc(sizeof(TokenList));
         new_token->next = NULL;
         new_token->freq = list_2->freq/2;
         new_token->word = list_2->word;
@@ -156,13 +74,13 @@ word_token *mean_dist(word_token* list_1, word_token* list_2) {
         curr = curr->next;
     }
 
-    word_token *ret = avg_list->next;
+    TokenList *ret = avg_list->next;
     free(avg_list);
 
     return ret;
 }
 
-double kullbeck(word_token* mean_list, word_token* dist_list) {
+double kullbeck(TokenList* mean_list, TokenList* dist_list) {
     double result = 0;
     while (dist_list != NULL) {
         while (mean_list != NULL && strcmp(mean_list->word, dist_list->word) != 0) {
@@ -178,7 +96,7 @@ double jensen(double a, double b) {
     return (a+b)/2;
 }
 
-void output(double j, file_token* list_1, file_token* list_2) {
+void output(double j, FileList* list_1, FileList* list_2) {
     if (0 <= j && j <= 0.1) {
         printf("\033[0;31m"); //red
     }
@@ -209,23 +127,23 @@ int main() {
     char* word4 = "there";
     char* word5 = "hel";
     char* word6 = "iota";
-    word_token* t = NULL;
-    word_token** t1 = &t;
+    TokenList* t = NULL;
+    TokenList** t1 = &t;
     insert_word(t1, word1, 0.5);
     insert_word(t1, word2, 0.25);
     insert_word(t1, word4, 0.25);
-    word_token* tt = NULL;
-    word_token** t2 = &tt;
+    TokenList* tt = NULL;
+    TokenList** t2 = &tt;
     insert_word(t2, word1, 0.5);
     insert_word(t2, word4, 0.5);
-    file_token* f = NULL;
-    file_token** f1 = &f;
+    FileList* f = NULL;
+    FileList** f1 = &f;
     insert_file(f1, *t1, "helloworld.txt", 300);
     insert_file(f1, *t2, "sunny.txt", 200);
-    word_token* result = NULL;
-    word_token** tresult = &result;
+    TokenList* result = NULL;
+    TokenList** tresult = &result;
     mean_dist(tresult, t1, t2);
-    word_token* list = result;
+    TokenList* list = result;
     double a = kullbeck(tresult, t1);
     double b = kullbeck(tresult, t2);
     //print_list(*tresult);

@@ -3,46 +3,69 @@
 #include <string.h>
 
 // should change to another name, i use a struct called token in reader.c
-typedef struct word_token {
-    struct word_token* next;
+typedef struct TokenList {
     double freq; //frequency of token in file
     char* word;
-} word_token;
 
-typedef struct file_token {
-    struct word_token* freq_chain;
-    struct file_token* next;
+    struct TokenList* next;
+
+} TokenList;
+
+typedef struct FileList {
+    struct TokenList* token_list;
     char* file_name;
     int total; //number of tokens
-} file_token;
+
+    struct FileList* next;
+
+} FileList;
+
+TokenList *new_toklist(double freq, const char *word) {
+    TokenList *new_token = malloc(sizeof(TokenList));
+
+    new_token->freq = freq;
+    new_token->word = malloc(strlen(word)+1);
+    strcpy(new_token->word, word);
+    new_token->next = NULL;
+
+    return new_token;
+}
+
+FileList *new_filelist(FileList *token_list, const char *file_name, int total) {
+    FileList *new_list = malloc(sizeof(FileList));
+
+    new_list->token_list = token_list;
+    new_list->file_name = malloc(strlen(file_name)+1);
+    strcpy(new_list->file_name, file_name);
+    new_list->next = NULL;
+
+    return new_list;
+}
 
 /* FREQUENCY CHAIN */
+void insert_word (TokenList** token_list, const char* word, double freq) {
+    TokenList* new_token = new_toklist(freq, word);
 
-void insert_word (word_token** freq_list, const char* input, double freq) {
-    word_token* new_token = (word_token*)malloc(sizeof(word_token));
-    new_token->freq = freq;
-    new_token->word = malloc(strlen(input)+1);
-    strcpy(new_token->word, input);
-
-    word_token* list = *freq_list;
+    TokenList* curr = *token_list;
     // first element
-    if (list == NULL || strcmp(input, list->word) < 0) {
-        new_token->next = list;
-        *freq_list = new_token;
+    if (curr == NULL || strcmp(word, curr->word) < 0) {
+        new_token->next = curr;
+        *token_list = new_token;
         return;
     }
 
-    while (list->next != NULL) {
-        if (strcmp(input, (list->next)->word) < 0) {
+    while (curr->next != NULL) {
+        if (strcmp(word, (curr->next)->word) < 0) {
             break;
         }
-        list = list->next;
+        curr = curr->next;
     }
-    new_token->next = list->next;
-    list->next = new_token;
+
+    new_token->next = curr->next;
+    curr->next = new_token;
 }
 
-void print_list(word_token* list) {
+void print_list(TokenList* list) {
     while (list != NULL) {
         printf("%s: %f\n", list->word, list->freq);
         list = list->next;
@@ -51,15 +74,10 @@ void print_list(word_token* list) {
 
 /* FILE FREQUENCY */
 
-void insert_file (file_token** file_list, word_token* word_list, char* input, int total) {
-    file_token* new_token = (file_token*)malloc(sizeof(file_token));
-    new_token->freq_chain = word_list;
-    new_token->total = total;
-    new_token->file_name = malloc(strlen(input)+1);
-    strcpy(new_token->file_name, input);
-    new_token->next = NULL;
+void insert_file (FileList** file_list, TokenList* token_list, char* file_name, int total) {
+    FileList* new_token = new_filelist(token_list, file_name, total);
 
-    file_token* list = *file_list;
+    FileList* list = *file_list;
     // first element
     if (list == NULL) {
         *file_list = new_token;
@@ -72,10 +90,10 @@ void insert_file (file_token** file_list, word_token* word_list, char* input, in
     list->next = new_token;
 }
 
-void print_file(file_token* list) {
+void print_file(FileList* list) {
     while (list != NULL) {
         printf("%s\n", list->file_name);
-        print_list(list->freq_chain);
+        print_list(list->token_list);
         list = list->next;
     }
 }
