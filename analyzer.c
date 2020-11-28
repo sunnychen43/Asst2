@@ -98,81 +98,71 @@ void print_file(file_token* list) {
     print_list(list->freq_chain);
 }
 
-void mean_dist(word_token** input_avg_list, word_token** input_list_1, word_token** input_list_2) {
-    word_token* list_1 = *input_list_1;
-    word_token* list_2 = *input_list_2;
-    word_token* avg_list = *input_avg_list;
-    word_token** result = &avg_list;
+word_token *mean_dist(word_token* list_1, word_token* list_2) {
+
+    word_token* avg_list = malloc(sizeof(word_token));
+    word_token* curr = avg_list;
+
     while (list_1 != NULL && list_2 != NULL) {
-        word_token* new_token = (word_token*)malloc(sizeof(word_token));
+        word_token* new_token = malloc(sizeof(word_token));
         new_token->next = NULL;
+
         if (strcmp(list_1->word, list_2->word) < 0) {
             new_token->freq = list_1->freq/2;
             new_token->word = list_1->word;
-            if (avg_list == NULL) {
-                *input_avg_list = new_token;
-            }
-            else {
-                avg_list->next = new_token;
-            }
+            curr->next = new_token;
+
             list_1 = list_1->next;
         }
         else if (strcmp(list_1->word, list_2->word) == 0) {
             new_token->freq = (list_1->freq+list_2->freq)/2;
             new_token->word = list_1->word;
-            if (avg_list == NULL) {
-                *input_avg_list = new_token;
-            }
-            else {
-                avg_list->next = new_token;
-            }
+            curr->next = new_token;
+
             list_1 = list_1->next;
             list_2 = list_2->next;
         }
         else {
             new_token->freq = list_2->freq/2;
             new_token->word = list_2->word;
-            if (avg_list == NULL) {
-                *input_avg_list = new_token;
-            }
-            else {
-                avg_list->next = new_token;
-            }
+            curr->next = new_token;
+
             list_2 = list_2->next;
         }
-        avg_list = new_token;
+
+        curr = curr->next;
     }
+
     while (list_1 != NULL) {
-        word_token* new_token = (word_token*)malloc(sizeof(word_token));
+        word_token* new_token = malloc(sizeof(word_token));
         new_token->next = NULL;
         new_token->freq = list_1->freq/2;
         new_token->word = list_1->word;
-        if (avg_list == NULL) {
-            *input_avg_list = new_token;
-        }
-        else {
-            avg_list->next = new_token;
-        }
+
+        curr->next = new_token;
         list_1 = list_1->next;
+
+        curr = curr->next;
     }
     while (list_2 != NULL) {
         word_token* new_token = (word_token*)malloc(sizeof(word_token));
         new_token->next = NULL;
         new_token->freq = list_2->freq/2;
         new_token->word = list_2->word;
-        if (avg_list == NULL) {
-            *input_avg_list = new_token;
-        }
-        else {
-            avg_list->next = new_token;
-        }
+
+        curr->next = new_token;
         list_2 = list_2->next;
+
+        curr = curr->next;
     }
+
+    word_token *ret = avg_list->next;
+    free(avg_list);
+
+    return ret;
 }
 
-double kullbeck(word_token** input_mean_list, word_token** input_dist_list) {
-    word_token* mean_list = *input_mean_list;
-    word_token* dist_list = *input_dist_list;
+double kullbeck(word_token* mean_list, word_token* dist_list) {
     double result = 0;
     while (dist_list != NULL) {
         while (mean_list != NULL && strcmp(mean_list->word, dist_list->word) != 0) {
