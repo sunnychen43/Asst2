@@ -5,18 +5,12 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "datastructs.c"
+#include "datastructs.h"
 #include <pthread.h> 
+#include "reader.h"
 
 
 /*------------------------------HASHTABLE-------------------------------------*/
-
-#define HASHSIZE 53
-typedef struct HashItem {
-	char *val;
-    int freq;
-    struct HashItem *next;
-} HashItem;
 
 /* djb2 hash function for strings by dan bernstein */
 int _hash(const char *s) {
@@ -85,13 +79,8 @@ TokenList *ht_read_all(HashItem **ht_table, int total) {
     return freq_list;
 }
 
-typedef struct Token {
-    char *token;
-    size_t size;
-    int index;
-} Token;
 
-void tok_insert_char (Token *tok, char c) {
+void tok_insert_char(Token *tok, char c) {
     if (tok->index >= (tok->size-1)) {
         tok->token = realloc(tok->token, tok->size*2);
         tok->size *= 2;
@@ -116,97 +105,4 @@ char *tok_to_string (Token *tok) {
 void tok_clear (Token *tok) {
     // no need to clear tok buffer, will be overwritten
     tok->index = 0;
-}
-
-static FileList *master;
-static pthread_mutex_t lock;
-static pthread_t tid[100];
-int tid_count = 0;
-
-void *read_file(void *args) {
-    const char *filename = (const char *)args;
-
-    HashItem *ht_table[HASHSIZE];
-    memset(ht_table, 0, HASHSIZE*sizeof(*ht_table));
-
-    int fd = open(filename, O_RDONLY);
-
-    char buf[1024];
-    int bytes_read;
-    int count = 0;
-
-    Token tok;
-    tok.token = malloc(128);
-    tok.size = 128;
-    tok.index = 0;
-
-    do {
-        bytes_read = read(fd, &buf, 1024);
-        
-        for (int i=0; i < bytes_read; i++) {
-            // check for delim
-            if (buf[i] == ' ' || buf[i] == '\n') {
-                char *s = tok_to_string(&tok);
-                if (s != NULL) {
-                    ht_add(ht_table, s);
-                    count++;
-                }
-                tok_clear(&tok);
-                continue;
-            }
-            // check for punctuation
-            if (isalpha(buf[i]) || buf[i] == '-') {
-                tok_insert_char(&tok, tolower(buf[i]));
-            }
-        }
-
-    } while (bytes_read == 1024);
-
-    char *s = tok_to_string(&tok);
-    if (s != NULL) {
-        ht_add(ht_table, s);
-        count++;
-    }
-    close(fd);
-    free(tok.token);
-
-    TokenList *tok_list = ht_read_all(ht_table, count);
-
-    pthread_mutex_lock(&lock); 
-    insert_file(&master, tok_list, filename, count);
-    pthread_mutex_unlock(&lock); 
-
-    return NULL;
-}
-
-void read_dir(const char *path) {
-    DIR *dir = opendir(path);
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        char *ent_path = malloc(strlen(entry->d_name)+strlen(path)+2);
-        sprintf(ent_path, "%s/%s", path, entry->d_name);
-
-        if (entry->d_type == DT_DIR) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                continue;
-            }
-            read_dir(ent_path);
-        }
-        else {
-            pthread_create(&tid[tid_count], NULL, read_file, ent_path);
-            tid_count++;
-        }
-    }
-}
-
-int main() {
-    read_dir("test");
-
-    pthread_mutex_init(&lock, NULL);
-    for (int i=0; i <= tid_count; i++) {
-        pthread_join(tid[i], NULL);
-    }
-    pthread_mutex_destroy(&lock);
-
-    print_file(master);
 }

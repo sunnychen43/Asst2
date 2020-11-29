@@ -12,19 +12,12 @@ Output in order from smallest to largest number of tokens
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "datastructs.c"
+#include "datastructs.h"
+#include "analyzer.h"
 
 
-typedef struct OutputList {
-    struct FileList* f1;
-    struct FileList* f2;
-    int sum; //number of tokens
-    double jensen;
-    struct OutputList* next;
-} OutputList;
-
-OutputList *new_outlist(FileList* f1, FileList* f2, double jensen) {
-    OutputList* new_list = (OutputList*)malloc(sizeof(OutputList));
+OutputList *new_outlist(FileList *f1, FileList *f2, double jensen) {
+    OutputList *new_list = (OutputList*)malloc(sizeof(OutputList));
     new_list->f1 = f1;
     new_list->f2 = f2;
     new_list->sum = f1->total + f2->total;
@@ -33,7 +26,7 @@ OutputList *new_outlist(FileList* f1, FileList* f2, double jensen) {
     return new_list;
 }
 
-void insert_output (OutputList** output_list, FileList* f1, FileList* f2, double jensen) {
+void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double jensen) {
     OutputList *curr = *output_list;
     OutputList *new_list = new_outlist(f1, f2, jensen);
     // first element
@@ -53,13 +46,13 @@ void insert_output (OutputList** output_list, FileList* f1, FileList* f2, double
     curr->next = new_list;
 }
 
-TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
+TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
-    TokenList* avg_list = malloc(sizeof(TokenList));
-    TokenList* curr = avg_list;
+    TokenList *avg_list = malloc(sizeof(TokenList));
+    TokenList *curr = avg_list;
 
     while (list_1 != NULL && list_2 != NULL) {
-        TokenList* new_token = malloc(sizeof(TokenList));
+        TokenList *new_token = malloc(sizeof(TokenList));
         new_token->next = NULL;
 
         if (strcmp(list_1->word, list_2->word) < 0) {
@@ -89,7 +82,7 @@ TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
     }
 
     while (list_1 != NULL) {
-        TokenList* new_token = new_toklist(list_1->freq/2, list_1->word);
+        TokenList *new_token = new_toklist(list_1->freq/2, list_1->word);
 
         curr->next = new_token;
         list_1 = list_1->next;
@@ -97,7 +90,7 @@ TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
         curr = curr->next;
     }
     while (list_2 != NULL) {
-        TokenList* new_token = new_toklist(list_2->freq/2, list_2->word);
+        TokenList *new_token = new_toklist(list_2->freq/2, list_2->word);
 
         curr->next = new_token;
         list_2 = list_2->next;
@@ -111,7 +104,7 @@ TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
     return ret;
 }
 
-double kullbeck(TokenList* mean_list, TokenList* dist_list) {
+double kullbeck(TokenList *mean_list, TokenList *dist_list) {
     double result = 0;
     while (dist_list != NULL) {
         while (mean_list != NULL && strcmp(mean_list->word, dist_list->word) != 0) {
@@ -127,7 +120,7 @@ double jensen(double a, double b) {
     return (a+b)/2;
 }
 
-void output(double j, FileList* list_1, FileList* list_2) {
+void output(double j, const char *file1, const char *file2) {
     if (0 <= j && j <= 0.1) {
         printf("\033[0;31m"); //red
     }
@@ -147,8 +140,8 @@ void output(double j, FileList* list_1, FileList* list_2) {
         printf("\033[0;37m"); //white
     }
     printf("%f ", j);
-    printf("\033[1;30m");
-    printf("\"%s\" and \"%s\"\n", list_1->file_name, list_2->file_name);
+    printf("\033[0m");
+    printf("\"%s\" and \"%s\"\n", file1, file2);
 }
 
 void anal_file(FileList* files) {
@@ -167,37 +160,7 @@ void anal_file(FileList* files) {
     }
     // print
     while (final_output != NULL) {
-        output(final_output->jensen, final_output->f1, final_output->f2);
-        printf("%d\n", final_output->sum);
+        output(final_output->jensen, final_output->f1->file_name, final_output->f2->file_name);
         final_output = final_output->next;
     }
-}
-
-int main() {
-    char* word1 = "hi";
-    char* word2 = "out";
-    char* word3 = "sun";
-    char* word4 = "there";
-    char* word5 = "hel";
-    char* word6 = "iota";
-    TokenList* t = NULL;
-    TokenList** t1 = &t;
-    insert_word(t1, word1, 0.5);
-    insert_word(t1, word2, 0.25);
-    insert_word(t1, word4, 0.25);
-    TokenList* tt = NULL;
-    TokenList** t2 = &tt;
-    insert_word(t2, word1, 0.5);
-    insert_word(t2, word4, 0.5);
-    FileList* f = NULL;
-    FileList** f1 = &f;
-    insert_file(f1, *t1, "helloworld.txt", 300);
-    insert_file(f1, *t2, "sunny.txt", 200);
-    insert_file(f1, *t1, "disney.txt", 20);
-    insert_file(f1, *t2, "hun.txt", 100);
-    TokenList* result = NULL;
-    TokenList** tresult = &result;
-    //print_list(*tresult);
-    anal_file(f);
-    //output(jensen(a,b), *f1, (*f1)->next); //haven't done the ordering from smallest to highest token number yet
 }
