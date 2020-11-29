@@ -1,8 +1,8 @@
 #include "datastructs.h"
 
 typedef struct OutputList {
-    struct FileList *f1;
-    struct FileList *f2;
+    char *file1;
+    char *file2;
     int sum; //number of tokens
     double jensen;
     struct OutputList* next;

@@ -18,8 +18,13 @@ Output in order from smallest to largest number of tokens
 
 OutputList *new_outlist(FileList *f1, FileList *f2, double jensen) {
     OutputList *new_list = (OutputList*)malloc(sizeof(OutputList));
-    new_list->f1 = f1;
-    new_list->f2 = f2;
+
+    new_list->file1 = malloc(strlen(f1->file_name)+1);
+    strcpy(new_list->file1, f1->file_name);
+
+    new_list->file2 = malloc(strlen(f2->file_name)+1);
+    strcpy(new_list->file2, f2->file_name);
+
     new_list->sum = f1->total + f2->total;
     new_list->jensen = jensen;
     new_list->next = NULL;
@@ -51,6 +56,8 @@ void free_output(OutputList *ol) {
     OutputList *tmp;
     while (p != NULL) {
         tmp = p->next;
+        free(p->file1);
+        free(p->file2);
         free(p);
         p = tmp;
     }
@@ -109,7 +116,6 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
     }
 
     TokenList *ret = avg_list->next;
-    free(avg_list->word);
     free(avg_list);
 
     return ret;
@@ -156,6 +162,7 @@ void output(double j, const char *file1, const char *file2) {
 }
 
 void anal_file(FileList* files) {
+    print_file(files);
     OutputList* final_output = NULL;
 
     while (files != NULL) {
@@ -164,6 +171,8 @@ void anal_file(FileList* files) {
             TokenList* result = mean_dist(files->token_list, subfiles->token_list);
             double a = kullbeck(result, files->token_list);
             double b = kullbeck(result, subfiles->token_list);
+            free_toklist(result);
+
             insert_output(&final_output, files, subfiles, jensen(a,b));
             subfiles = subfiles->next;
         }
@@ -173,7 +182,7 @@ void anal_file(FileList* files) {
     // print
     OutputList *curr = final_output;
     while (curr != NULL) {
-        output(curr->jensen, curr->f1->file_name, curr->f2->file_name);
+        output(curr->jensen, curr->file1, curr->file2);
         curr = curr->next;
     }
 

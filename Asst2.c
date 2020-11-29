@@ -41,6 +41,7 @@ void *read_file(void *args) {
                 char *s = tok_to_string(&tok);
                 if (s != NULL) {
                     ht_add(ht_table, s);
+                    free(s);
                     count++;
                 }
                 tok_clear(&tok);
@@ -57,6 +58,7 @@ void *read_file(void *args) {
     char *s = tok_to_string(&tok);
     if (s != NULL) {
         ht_add(ht_table, s);
+        free(s);
         count++;
     }
     close(fd);
@@ -89,8 +91,6 @@ void read_dir(const char *path) {
             pthread_create(&tid[tid_count], NULL, read_file, ent_path);
             tid_count++;
         }
-
-        free(ent_path);
     }
     closedir(dir);
 }
