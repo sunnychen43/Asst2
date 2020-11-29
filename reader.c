@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "datastructs.c"
@@ -17,9 +17,6 @@ typedef struct HashItem {
     struct HashItem *next;
 } HashItem;
 
-static HashItem *ht_table[HASHSIZE];
-
-
 /* djb2 hash function for strings by dan bernstein */
 int _hash(const char *s) {
     unsigned long hash = 5381;
@@ -31,7 +28,7 @@ int _hash(const char *s) {
     return hash % HASHSIZE;
 }
 
-HashItem *ht_lookup(const char *s) {
+HashItem *ht_lookup(HashItem **ht_table, const char *s) {
 	HashItem *ptr = ht_table[_hash(s)];
 	for (; ptr != NULL; ptr = ptr->next) {
 		if (strcmp(s, ptr->val) == 0) {
@@ -41,10 +38,10 @@ HashItem *ht_lookup(const char *s) {
 	return NULL;
 }
 
-void ht_add(const char *s) {
+void ht_add(HashItem **ht_table, const char *s) {
     if (s == NULL) {return;}
 
-    HashItem *ptr = ht_lookup(s);
+    HashItem *ptr = ht_lookup(ht_table, s);
     if (ptr == NULL) {  // not found
         HashItem *new_item = malloc(sizeof(HashItem));
         new_item->val = malloc(strlen(s)+1);
@@ -61,7 +58,7 @@ void ht_add(const char *s) {
     }
 }
 
-void ht_free() {
+void ht_free(HashItem **ht_table) {
 	for (int i=0; i < HASHSIZE; i++) {
 		HashItem *tmp, *p = ht_table[i];
 		while (p != NULL) {
@@ -73,7 +70,7 @@ void ht_free() {
 	}
 }
 
-TokenList *ht_read_all(int total) {
+TokenList *ht_read_all(HashItem **ht_table, int total) {
     TokenList *freq_list = NULL;
 
     for (int i=0; i < HASHSIZE; i++) {
@@ -120,7 +117,14 @@ void tok_clear (Token *tok) {
     tok->index = 0;
 }
 
-int read_file(const char *filename) {
+static FileList *master;
+
+void *read_file(void *args) {
+    const char *filename = (const char *)args;
+
+    HashItem *ht_table[HASHSIZE];
+    memset(ht_table, 0, HASHSIZE*sizeof(*ht_table));
+
     int fd = open(filename, O_RDONLY);
 
     char buf[1024];
@@ -140,7 +144,7 @@ int read_file(const char *filename) {
             if (buf[i] == ' ' || buf[i] == '\n') {
                 char *s = tok_to_string(&tok);
                 if (s != NULL) {
-                    ht_add(s);
+                    ht_add(ht_table, s);
                     count++;
                 }
                 tok_clear(&tok);
@@ -156,22 +160,38 @@ int read_file(const char *filename) {
 
     char *s = tok_to_string(&tok);
     if (s != NULL) {
-        ht_add(s);
+        ht_add(ht_table, s);
         count++;
     }
     close(fd);
+    free(tok.token);
 
-    return count;
+    TokenList *tok_list = ht_read_all(ht_table, count);
+    insert_file(&master, tok_list, filename, count);
+
+    return NULL;
 }
 
-static FileList *master;
+void read_dir(const char *path) {
+    DIR *dir = opendir(path);
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        char *ent_path = malloc(strlen(entry->d_name)+strlen(path)+2);
+        sprintf(ent_path, "%s/%s", path, entry->d_name);
+
+        if (entry->d_type == DT_DIR) {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+            read_dir(ent_path);
+        }
+        else {
+            read_file(ent_path);
+        }
+    }
+}
 
 int main() {
-    int count = read_file("test.txt");
-    printf("%d\n", count);
-
-    TokenList *p = ht_read_all(count);
-    insert_file(&master, p, "test.txt", count);
-
+    read_dir("test");
     print_file(master);
 }

@@ -31,7 +31,7 @@ TokenList *new_toklist(double freq, const char *word) {
     return new_token;
 }
 
-FileList *new_filelist(FileList *token_list, const char *file_name, int total) {
+FileList *new_filelist(TokenList *token_list, const char *file_name, int total) {
     FileList *new_list = malloc(sizeof(FileList));
 
     new_list->token_list = token_list;
@@ -74,9 +74,9 @@ void print_list(TokenList* list) {
 
 /* FILE FREQUENCY */
 
-void insert_file (FileList** file_list, TokenList* token_list, char* file_name, int total) {
-    FileList* new_token = new_filelist(token_list, file_name, total);
+void insert_file (FileList** file_list, TokenList* token_list, const char* file_name, int total) {
 
+    FileList* new_token = new_filelist(token_list, file_name, total);
     FileList* list = *file_list;
     // first element
     if (list == NULL) {
