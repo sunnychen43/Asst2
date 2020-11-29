@@ -77,6 +77,10 @@ void *read_file(void *args) {
 
 void read_dir(const char *path) {
     DIR *dir = opendir(path);
+    if (dir == NULL) {
+        printf("Error open dir: %s\n", path);
+    }
+    
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
         char *ent_path = malloc(strlen(entry->d_name)+strlen(path)+2);
