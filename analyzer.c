@@ -23,29 +23,34 @@ typedef struct OutputList {
     struct OutputList* next;
 } OutputList;
 
+OutputList *new_outlist(FileList* f1, FileList* f2, double jensen) {
+    OutputList* new_list = (OutputList*)malloc(sizeof(OutputList));
+    new_list->f1 = f1;
+    new_list->f2 = f2;
+    new_list->sum = f1->total + f2->total;
+    new_list->jensen = jensen;
+    new_list->next = NULL;
+    return new_list;
+}
+
 void insert_output (OutputList** output_list, FileList* f1, FileList* f2, double jensen) {
-    OutputList* new_token = (OutputList*)malloc(sizeof(OutputList));
-    new_token->f1 = f1;
-    new_token->f2 = f2;
-    new_token->sum = f1->total + f2->total;
-    new_token->jensen = jensen;
-    new_token->next = NULL;
-    OutputList* list = *output_list;
+    OutputList *curr = *output_list;
+    OutputList *new_list = new_outlist(f1, f2, jensen);
     // first element
-    if (list == NULL || new_token->sum < list->sum) {
-        new_token->next = list;
-        *output_list = new_token;
+    if (curr == NULL || new_list->sum > curr->sum) {
+        new_list->next = curr;
+        *output_list = new_list;
         return;
     }
     //insertion sort
-    while (list->next != NULL) {
-        if (new_token->sum > list->sum) {
+    while (curr->next != NULL) {
+        if (new_list->sum > curr->next->sum) {
             break;
         }
-        list = list->next;
+        curr = curr->next;
     }
-    new_token->next = list->next;
-    list->next = new_token;
+    new_list->next = curr->next;
+    curr->next = new_list;
 }
 
 TokenList *mean_dist(TokenList* list_1, TokenList* list_2) {
@@ -163,6 +168,7 @@ void anal_file(FileList* files) {
     // print
     while (final_output != NULL) {
         output(final_output->jensen, final_output->f1, final_output->f2);
+        printf("%d\n", final_output->sum);
         final_output = final_output->next;
     }
 }
@@ -192,6 +198,6 @@ int main() {
     TokenList* result = NULL;
     TokenList** tresult = &result;
     //print_list(*tresult);
-    anal_file(*f1);
+    anal_file(f);
     //output(jensen(a,b), *f1, (*f1)->next); //haven't done the ordering from smallest to highest token number yet
 }

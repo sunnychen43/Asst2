@@ -37,6 +37,7 @@ FileList *new_filelist(TokenList *token_list, const char *file_name, int total) 
     new_list->token_list = token_list;
     new_list->file_name = malloc(strlen(file_name)+1);
     strcpy(new_list->file_name, file_name);
+    new_list->total = total;
     new_list->next = NULL;
 
     return new_list;
@@ -75,7 +76,6 @@ void print_list(TokenList* list) {
 /* FILE FREQUENCY */
 
 void insert_file (FileList** file_list, TokenList* token_list, const char* file_name, int total) {
-
     FileList* new_token = new_filelist(token_list, file_name, total);
     FileList* list = *file_list;
     // first element
