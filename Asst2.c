@@ -71,6 +71,7 @@ void *read_file(void *args) {
     insert_file(&master, tok_list, filename, count);
     pthread_mutex_unlock(&lock);
 
+    free(args);
     return NULL;
 }
 
@@ -83,17 +84,22 @@ void read_dir(const char *path) {
 
         if (entry->d_type == DT_DIR) {
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                free(ent_path);
                 continue;
             }
             read_dir(ent_path);
+            free(ent_path);
         }
         else if (entry->d_type == DT_REG){
             pthread_create(&tid[tid_count], NULL, read_file, ent_path);
             tid_count++;
         }
-
+        else {
+            free(ent_path);
+        }
     }
     closedir(dir);
+    
 }
 
 int main() {

@@ -35,14 +35,14 @@ void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double
     OutputList *curr = *output_list;
     OutputList *new_list = new_outlist(f1, f2, jensen);
     // first element
-    if (curr == NULL || new_list->sum > curr->sum) {
+    if (curr == NULL || new_list->sum < curr->sum) {
         new_list->next = curr;
         *output_list = new_list;
         return;
     }
     //insertion sort
     while (curr->next != NULL) {
-        if (new_list->sum > curr->next->sum) {
+        if (new_list->sum < curr->next->sum) {
             break;
         }
         curr = curr->next;
@@ -66,6 +66,7 @@ void free_output(OutputList *ol) {
 TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
     TokenList *avg_list = malloc(sizeof(TokenList));
+    avg_list->next = NULL;
     TokenList *curr = avg_list;
 
     while (list_1 != NULL && list_2 != NULL) {

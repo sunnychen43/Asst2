@@ -74,13 +74,6 @@ void insert_word (TokenList **token_list, const char *word, double freq) {
     curr->next = new_token;
 }
 
-void print_list(TokenList *list) {
-    while (list != NULL) {
-        printf("%s: %f\n", list->word, list->freq);
-        list = list->next;
-    }
-}
-
 /* FILE FREQUENCY */
 
 void insert_file(FileList **file_list, TokenList *token_list, const char *file_name, int total) {
@@ -96,12 +89,4 @@ void insert_file(FileList **file_list, TokenList *token_list, const char *file_n
         list = list->next;
     }
     list->next = new_token;
-}
-
-void print_file(FileList *list) {
-    while (list != NULL) {
-        printf("%s\n", list->file_name);
-        print_list(list->token_list);
-        list = list->next;
-    }
 }
