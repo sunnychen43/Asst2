@@ -69,27 +69,23 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
     TokenList *curr = avg_list;
 
     while (list_1 != NULL && list_2 != NULL) {
-        TokenList *new_token = malloc(sizeof(TokenList));
-        new_token->next = NULL;
+        TokenList *new_token;
 
         if (strcmp(list_1->word, list_2->word) < 0) {
-            new_token->freq = list_1->freq/2;
-            new_token->word = list_1->word;
+            new_token = new_toklist(list_1->freq/2, list_1->word);
             curr->next = new_token;
 
             list_1 = list_1->next;
         }
         else if (strcmp(list_1->word, list_2->word) == 0) {
-            new_token->freq = (list_1->freq+list_2->freq)/2;
-            new_token->word = list_1->word;
+            new_token = new_toklist((list_1->freq+list_2->freq)/2, list_1->word);
             curr->next = new_token;
 
             list_1 = list_1->next;
             list_2 = list_2->next;
         }
         else {
-            new_token->freq = list_2->freq/2;
-            new_token->word = list_2->word;
+            new_token = new_toklist(list_2->freq/2, list_2->word);
             curr->next = new_token;
 
             list_2 = list_2->next;
@@ -162,7 +158,6 @@ void output(double j, const char *file1, const char *file2) {
 }
 
 void anal_file(FileList* files) {
-    print_file(files);
     OutputList* final_output = NULL;
 
     while (files != NULL) {

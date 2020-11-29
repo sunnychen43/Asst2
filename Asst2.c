@@ -87,10 +87,11 @@ void read_dir(const char *path) {
             }
             read_dir(ent_path);
         }
-        else {
+        else if (entry->d_type == DT_REG){
             pthread_create(&tid[tid_count], NULL, read_file, ent_path);
             tid_count++;
         }
+
     }
     closedir(dir);
 }
