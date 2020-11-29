@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "datastructs.c"
+#include <pthread.h> 
 
 
 /*------------------------------HASHTABLE-------------------------------------*/
@@ -118,6 +119,9 @@ void tok_clear (Token *tok) {
 }
 
 static FileList *master;
+static pthread_mutex_t lock;
+static pthread_t tid[100];
+int tid_count = 0;
 
 void *read_file(void *args) {
     const char *filename = (const char *)args;
@@ -167,7 +171,10 @@ void *read_file(void *args) {
     free(tok.token);
 
     TokenList *tok_list = ht_read_all(ht_table, count);
+
+    pthread_mutex_lock(&lock); 
     insert_file(&master, tok_list, filename, count);
+    pthread_mutex_unlock(&lock); 
 
     return NULL;
 }
@@ -186,12 +193,20 @@ void read_dir(const char *path) {
             read_dir(ent_path);
         }
         else {
-            read_file(ent_path);
+            pthread_create(&tid[tid_count], NULL, read_file, ent_path);
+            tid_count++;
         }
     }
 }
 
 int main() {
     read_dir("test");
+
+    pthread_mutex_init(&lock, NULL);
+    for (int i=0; i <= tid_count; i++) {
+        pthread_join(tid[i], NULL);
+    }
+    pthread_mutex_destroy(&lock);
+
     print_file(master);
 }
