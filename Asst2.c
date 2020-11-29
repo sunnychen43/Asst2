@@ -63,10 +63,11 @@ void *read_file(void *args) {
     free(tok.token);
 
     TokenList *tok_list = ht_read_all(ht_table, count);
+    ht_free(ht_table);
 
     pthread_mutex_lock(&lock); 
     insert_file(&master, tok_list, filename, count);
-    pthread_mutex_unlock(&lock); 
+    pthread_mutex_unlock(&lock);
 
     return NULL;
 }
@@ -88,7 +89,10 @@ void read_dir(const char *path) {
             pthread_create(&tid[tid_count], NULL, read_file, ent_path);
             tid_count++;
         }
+
+        free(ent_path);
     }
+    closedir(dir);
 }
 
 int main() {
@@ -100,4 +104,5 @@ int main() {
     pthread_mutex_destroy(&lock);
 
     anal_file(master);
+    free_filelist(master);
 }

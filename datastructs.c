@@ -16,6 +16,17 @@ TokenList *new_toklist(double freq, const char *word) {
     return new_token;
 }
 
+void free_toklist(TokenList *tl) {
+    TokenList *p = tl;
+    TokenList *tmp;
+    while (p != NULL) {
+        tmp = p->next;
+        free(p->word);
+        free(p);
+        p = tmp;
+    }
+}
+
 FileList *new_filelist(TokenList *token_list, const char *file_name, int total) {
     FileList *new_list = malloc(sizeof(FileList));
 
@@ -26,6 +37,18 @@ FileList *new_filelist(TokenList *token_list, const char *file_name, int total) 
     new_list->next = NULL;
 
     return new_list;
+}
+
+void free_filelist(FileList *fl) {
+    FileList *p = fl;
+    FileList *tmp;
+    while (p != NULL) {
+        tmp = p->next;
+        free(p->file_name);
+        free_toklist(p->token_list);
+        free(p);
+        p = tmp;
+    }
 }
 
 /* FREQUENCY CHAIN */

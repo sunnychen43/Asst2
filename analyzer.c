@@ -46,6 +46,16 @@ void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double
     curr->next = new_list;
 }
 
+void free_output(OutputList *ol) {
+    OutputList *p = ol;
+    OutputList *tmp;
+    while (p != NULL) {
+        tmp = p->next;
+        free(p);
+        p = tmp;
+    }
+}
+
 TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
     TokenList *avg_list = malloc(sizeof(TokenList));
@@ -99,6 +109,7 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
     }
 
     TokenList *ret = avg_list->next;
+    free(avg_list->word);
     free(avg_list);
 
     return ret;
@@ -158,9 +169,13 @@ void anal_file(FileList* files) {
         }
         files = files->next;
     }
+
     // print
-    while (final_output != NULL) {
-        output(final_output->jensen, final_output->f1->file_name, final_output->f2->file_name);
-        final_output = final_output->next;
+    OutputList *curr = final_output;
+    while (curr != NULL) {
+        output(curr->jensen, curr->f1->file_name, curr->f2->file_name);
+        curr = curr->next;
     }
+
+    free_output(final_output);
 }

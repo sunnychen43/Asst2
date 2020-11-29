@@ -79,13 +79,11 @@ TokenList *ht_read_all(HashItem **ht_table, int total) {
     return freq_list;
 }
 
-
 void tok_insert_char(Token *tok, char c) {
     if (tok->index >= (tok->size-1)) {
         tok->token = realloc(tok->token, tok->size*2);
         tok->size *= 2;
     }
-
     tok->token[tok->index] = c;
     tok->index++;
 }
