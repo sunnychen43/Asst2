@@ -163,7 +163,7 @@ void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double
         *output_list = new_list;
         return;
     }
-    //insertion sort from smallest to greatest
+    //insertion sort from smallest to greatest total number of tokens between the two files
     while (curr->next != NULL) {
         if (new_list->sum < curr->next->sum) {
             break;
