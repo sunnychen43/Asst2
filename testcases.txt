@@ -37,13 +37,13 @@ test2/
     nopunctuation.txt
     punctuation.txt
 -------------------------------------------------------------------------------------------------------------------------------
-Nopuncutation.txt: 
+puncutation.txt: 
 Lorem ipsum, dolor s,it amet conse123ctetur adipi..sc,ing elit sed do eius???mod tempor incididunt ut labore et dolore magna 
 aliqua Ut enim ad minim veniam quis nostr,ud exercit,,,ation ullamco l,aboris ni,si ut aliquip, ex ea co,mmo,do conse,,,quat,,,,
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum doloreeu fugiat nulla pari....atur Excepteur sin...t 
 occaecat cupi////datat non proident sunt in culpa qui officia des..erunt mollit anim id est laborum
 
-Punctuation.txt:
+nopunctuation.txt:
 Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim 
 ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in 
 reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident 
