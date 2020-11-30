@@ -4,6 +4,8 @@
 
 #include "datastructs.h"
 
+/*------------------------------TokenList-------------------------------------*/
+
 /* 
 Creates and returns the pointer to a new TokenList object, and sets the frequency and 
 word accordingly strcpy() is used to ensure changes to the parameter word will not 
@@ -55,6 +57,9 @@ void insert_word (TokenList **token_list, const char *word, double freq) {
     new_token->next = curr->next;
     curr->next = new_token;
 }
+
+
+/*------------------------------FileList-------------------------------------*/
 
 /* 
 Creates and returns the pointer to a new FileList object, and sets the total token count,
@@ -108,6 +113,9 @@ void insert_file(FileList **file_list, TokenList *token_list, const char *file_n
     list->next = new_token;
 }
 
+
+/*------------------------------OutputList-------------------------------------*/
+
 /*
 Creates and returns a pointer to a new OutputList object for the given pair of files and their calculated 
 Jensen distance. malloc and strcpy file_names for each file so that double freeing will not occur.
@@ -149,13 +157,13 @@ Uses insertion sort to keep the output_list sorted from least number of total to
 void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double jensen) {
     OutputList *curr = *output_list;
     OutputList *new_list = new_outlist(f1, f2, jensen);
-    // first element
+    // check if new_list belongs in beginning of LL
     if (curr == NULL || new_list->sum < curr->sum) {
         new_list->next = curr;
         *output_list = new_list;
         return;
     }
-    //insertion sort
+    //insertion sort from smallest to greatest
     while (curr->next != NULL) {
         if (new_list->sum < curr->next->sum) {
             break;

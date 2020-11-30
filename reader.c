@@ -19,6 +19,7 @@ int _hash(const char *s) {
     return hash % HASHSIZE;
 }
 
+/* search hashtable for an entry that has val=s */
 HashItem *ht_lookup(HashItem **ht_table, const char *s) {
 	HashItem *ptr = ht_table[_hash(s)];
 	for (; ptr != NULL; ptr = ptr->next) {
@@ -29,6 +30,7 @@ HashItem *ht_lookup(HashItem **ht_table, const char *s) {
 	return NULL;
 }
 
+/* insert s into the hash table. if s is already present, then increment associated freq */
 void ht_add(HashItem **ht_table, const char *s) {
     if (s == NULL) {return;}
 
@@ -49,6 +51,7 @@ void ht_add(HashItem **ht_table, const char *s) {
     }
 }
 
+/* free all elements in ht */
 void ht_free(HashItem **ht_table) {
 	for (int i=0; i < HASHSIZE; i++) {
 		HashItem *tmp, *p = ht_table[i];
@@ -61,6 +64,7 @@ void ht_free(HashItem **ht_table) {
 	}
 }
 
+/* go through all elements in hashtable and generate a TokenList based on freq distribution */
 TokenList *ht_read_all(HashItem **ht_table, int total) {
     TokenList *freq_list = NULL;
 
@@ -76,8 +80,10 @@ TokenList *ht_read_all(HashItem **ht_table, int total) {
 }
 
 
+/*------------------------------Token-------------------------------------*/
+
 void tok_insert_char(Token *tok, char c) {
-    if (tok->index >= (tok->size-1)) {
+    if (tok->index >= (tok->size-1)) {  // if tok is too small to hold token, double its size
         tok->token = realloc(tok->token, tok->size*2);
         tok->size *= 2;
     }
@@ -86,13 +92,13 @@ void tok_insert_char(Token *tok, char c) {
 }
 
 char *tok_to_string (Token *tok) {
-    if (tok->index == 0) {
+    if (tok->index == 0) {  // make sure tok isnt length 0
         return NULL;
     }
 
     // set null terminator
     tok->token[tok->index] = 0;
-    char *s = malloc(tok->index+2);
+    char *s = malloc(tok->index+2);  // malloc new string to store token
     strcpy(s, tok->token);
     return s;
 }

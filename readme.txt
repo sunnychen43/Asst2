@@ -28,8 +28,10 @@ NOTE: We only handle files with threads. If a directory contains a huge nest of 
 
 read_file() will tokenize all the words in the given file, storing them in a hashtable to keep track of frequencies. We use a Token data structure defined in reader.h to store tokens, which can handle words of variable size. Each pthread will have a seperate HashTable, storing the frequencies of words for its respective file.
 
+
 Computing Distribution - 
 Once we have the hashtable of frequencies, we iterate through each key/value pair to generate a TokenList. A TokenList is a linked list of tokens, sorted alphabetically, and contains the relative distribution for each one. Each file will have its own TokenList containing the token distribution. We store the file's name, total number of tokens, and associated TokenList in another linked list called a FileList. This FileList is a shared data structure across all threads containing information about all the files. We use a mutex when adding elements to the FileList. Once all threads have completed, the FileList will contain the token distribution for all scanned files.
+
 
 Analysis -
 The analyze() function compares each pair of files. For each pair, it generates a mean distribution TokenList and uses that to compute the KLD and JSD. Since our output must be ordered from least to greatest number of tokens, we store the JSD for each pair of files, along with the sum of their tokens in an OutputList. OutputList is a sorted linked list, containg all pairs of files, their number of tokens, and their JSD. Once all pairs have been processed, we go through the OutputList and print the JSD for each pair. Depending on how "similar" the files are, they will be color coded from RED (very similar) to WHITE (not similar).
