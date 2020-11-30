@@ -1,67 +1,11 @@
-/*
-For each pair of file distributions:
-Make mean distribution linked list by iterating through other two distributions with pointers
-Calculate each Kullback-Leibler Divergence
-Calculate the Jensen Shannon Distance
-Outputs the Jensen Shannon distances for each pair
-Color coded outputs
-Output in order from smallest to largest number of tokens
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "datastructs.h"
+
 #include "analyzer.h"
+#include "datastructs.h"
 
-
-OutputList *new_outlist(FileList *f1, FileList *f2, double jensen) {
-    OutputList *new_list = (OutputList*)malloc(sizeof(OutputList));
-
-    new_list->file1 = malloc(strlen(f1->file_name)+1);
-    strcpy(new_list->file1, f1->file_name);
-
-    new_list->file2 = malloc(strlen(f2->file_name)+1);
-    strcpy(new_list->file2, f2->file_name);
-
-    new_list->sum = f1->total + f2->total;
-    new_list->jensen = jensen;
-    new_list->next = NULL;
-    return new_list;
-}
-
-void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double jensen) {
-    OutputList *curr = *output_list;
-    OutputList *new_list = new_outlist(f1, f2, jensen);
-    // first element
-    if (curr == NULL || new_list->sum < curr->sum) {
-        new_list->next = curr;
-        *output_list = new_list;
-        return;
-    }
-    //insertion sort
-    while (curr->next != NULL) {
-        if (new_list->sum < curr->next->sum) {
-            break;
-        }
-        curr = curr->next;
-    }
-    new_list->next = curr->next;
-    curr->next = new_list;
-}
-
-void free_output(OutputList *ol) {
-    OutputList *p = ol;
-    OutputList *tmp;
-    while (p != NULL) {
-        tmp = p->next;
-        free(p->file1);
-        free(p->file2);
-        free(p);
-        p = tmp;
-    }
-}
 
 TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
@@ -158,7 +102,7 @@ void output(double j, const char *file1, const char *file2) {
     printf("\"%s\" and \"%s\"\n", file1, file2);
 }
 
-void anal_file(FileList* files) {
+void analyze(FileList* files) {
     OutputList* final_output = NULL;
 
     while (files != NULL) {

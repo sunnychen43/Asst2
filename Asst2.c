@@ -1,6 +1,3 @@
-#include "reader.h"
-#include "datastructs.h"
-#include "analyzer.h"
 #include <pthread.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,9 +7,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "reader.h"
+#include "datastructs.h"
+#include "analyzer.h"
+
+
 static FileList *master;
 static pthread_mutex_t lock;
-static pthread_t tid[100];
+static pthread_t tid[1024];
 int tid_count = 0;
 
 void *read_file(void *args) {
@@ -78,9 +80,10 @@ void *read_file(void *args) {
 void read_dir(const char *path) {
     DIR *dir = opendir(path);
     if (dir == NULL) {
-        printf("Error open dir: %s\n", path);
+        printf("Can't open dir: %s\n", path);
+        return;
     }
-    
+
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
         char *ent_path = malloc(strlen(entry->d_name)+strlen(path)+2);
@@ -103,17 +106,23 @@ void read_dir(const char *path) {
         }
     }
     closedir(dir);
-    
 }
 
-int main() {
-    read_dir("test");
+
+
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        printf("Invalid arguments, 1 required\n");
+        return -1;
+    }
+
+    read_dir(argv[1]);
     pthread_mutex_init(&lock, NULL);
     for (int i=0; i <= tid_count; i++) {
         pthread_join(tid[i], NULL);
     }
     pthread_mutex_destroy(&lock);
 
-    anal_file(master);
+    analyze(master);
     free_filelist(master);
 }

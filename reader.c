@@ -1,13 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include "datastructs.h"
-#include <pthread.h> 
+
 #include "reader.h"
+#include "datastructs.h"
 
 
 /*------------------------------HASHTABLE-------------------------------------*/
@@ -78,6 +74,7 @@ TokenList *ht_read_all(HashItem **ht_table, int total) {
 
     return freq_list;
 }
+
 
 void tok_insert_char(Token *tok, char c) {
     if (tok->index >= (tok->size-1)) {
