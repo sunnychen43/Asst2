@@ -1,0 +1,133 @@
+Testcase #1:
+-------------------------------------------------------------------------------------------------------------------------------
+Directory structure:
+
+test1/
+    Part1/
+        Bible.txt
+        Book-war-and-peace.txt
+    Part2/
+	   Paradise.txt
+	   ulysses.txt
+-------------------------------------------------------------------------------------------------------------------------------
+The purpose of this test case is to test how the dectector handles large files. Each of the txt files are a few mb large with
+many words. Since we use multithreading, our program should process them relatively quickly, since they are handeled in
+parallel.
+
+Output #1:
+-------------------------------------------------------------------------------------------------------------------------------
+> make && ./detector “testcases/test1”
+0.102634 "testcases/test1/part2/paradise.txt" and "testcases/test1/part2/ulysses.txt"
+0.101182 "testcases/test1/part2/paradise.txt" and “testcases/test1/part1/book-war-and-peace.txt"
+0.058738 "testcases/test1/part1/book-war-and-peace.txt" and "testcases/test1/part2/ulysses.txt"
+0.091515 "testcases/test1/part2/paradise.txt" and "testcases/test1/part1/bible.txt"
+0.091132 "testcases/test1/part1/bible.txt" and "testcases/test1/part2/ulysses.txt"
+0.086821 "testcases/test1/part1/bible.txt" and "testcases/test1/part1/book-war-and-peace.txt"
+
+The program takes only 1-2 seconds, which is a suitable time.
+-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Testcase #2:
+-------------------------------------------------------------------------------------------------------------------------------
+Directory structure:
+
+test2/
+    nopunctuation.txt
+    punctuation.txt
+-------------------------------------------------------------------------------------------------------------------------------
+Nopuncutation.txt: 
+Lorem ipsum, dolor s,it amet conse123ctetur adipi..sc,ing elit sed do eius???mod tempor incididunt ut labore et dolore magna 
+aliqua Ut enim ad minim veniam quis nostr,ud exercit,,,ation ullamco l,aboris ni,si ut aliquip, ex ea co,mmo,do conse,,,quat,,,,
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum doloreeu fugiat nulla pari....atur Excepteur sin...t 
+occaecat cupi////datat non proident sunt in culpa qui officia des..erunt mollit anim id est laborum
+
+Punctuation.txt:
+Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim 
+ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in 
+reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident 
+sunt in culpa qui officia deserunt mollit anim id est laborum
+
+The purpose of this test case is to check how it handles puncutation. Both text files are identical, except punctuation.txt
+contains random non-alpha characters scattered around. Since the detector should ignore puncutation, it should report both files
+as identical.
+
+Output #2:
+-------------------------------------------------------------------------------------------------------------------------------
+> make && ./detector “testcases/test2”
+0.000000 "testcases/test2/nopunctuation.txt" and "testcases/test2/punctuation.txt"
+
+The JSD is 0, which is expected since both txt files are identical if you remove the punctuation.
+-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Testcase #3:
+-------------------------------------------------------------------------------------------------------------------------------
+test3/
+    binary
+    code.c
+    test.txt
+    link
+-------------------------------------------------------------------------------------------------------------------------------
+This tests how our detector handles files of different types. binary, code.c, and test.txt are all regular files, and should
+be processed. link is a unix symbolic link, so it should be ignored.
+
+Output #3:
+-------------------------------------------------------------------------------------------------------------------------------
+> make && ./detector “testcases/test3”
+0.128023 "testcases/test3/binary" and "testcases/test3/code.c"
+0.147796 "testcases/test3/text.txt" and "testcases/test3/code.c"
+0.099648 "testcases/test3/text.txt" and "testcases/test3/binary"
+
+The detector skips testcases/test3/link and process all of the other files.
+-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Testcase #4:
+-------------------------------------------------------------------------------------------------------------------------------
+test4/
+    0/
+	   Files 0-9.txt
+    1/
+	   Files 0-9.txt
+    2/
+	   Files 0-9.txt
+    3/
+	   Files 0-9.txt
+    4/
+	   Files 0-9.txt
+-------------------------------------------------------------------------------------------------------------------------------
+The purpose of this test case is to check that the detector is capable of handling and analyzing a large number of files and 
+directories without error. There are 5 directories of 10 files each, and we can compare 5*10=50 files in total without 
+significantly affecting runtime while outputting all 50 choose 2 = 1225 file pairs and their corresponding JSDs.
+
+Our expected output is omitted for the sake of space, but the detector can handle it quickly.
+-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Testcase #5:
+-------------------------------------------------------------------------------------------------------------------------------
+test5/
+    dir1/
+	   test1.txt
+    dir2/
+    dir3/
+	   test2.txt
+	   text3.txt
+-------------------------------------------------------------------------------------------------------------------------------
+This testcase shows the detector is capable of gracefully handling empty directories without error. Here, dir2 is an empty 
+subdirectory within the test5 directory, and our program simply ignores the empty directory and calculates the JSD for the 
+remaining 3 text files in dir1 and dir3.
+
+Output #5:
+-------------------------------------------------------------------------------------------------------------------------------
+>make && ./detector “testcases/test5”
+0.228882 "testcases/test5/dir3/test3.txt" and "testcases/test5/dir1/test1.txt"
+0.231404 "testcases/test5/dir3/test2.txt" and "testcases/test5/dir3/test3.txt"
+0.220979 "testcases/test5/dir3/test2.txt" and "testcases/test5/dir1/test1.txt"
+-------------------------------------------------------------------------------------------------------------------------------
+
