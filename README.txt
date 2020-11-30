@@ -10,7 +10,7 @@ Included Files:
     analyzer.c      - performs all mathematical operations: KLD, JSD, finding mean distribution
     datastructs.c   - defines data structures and related helper functions
     reader.c        - contains HashTable and helper functions for tokenizing
-    
+
     testcases.txt   - brief description for each of our testcases
     testcases/      - folder containing our testcases to run
 
@@ -19,7 +19,7 @@ Included Files:
 
 Usage:
  > make && ./detector "."  (runs program on current directory)
- > make && ./detector "C:\User\Name\filepath" (runs program on indicated file path)
+ > make && ./detector "/usr/username/filepath" (runs program on indicated file path)
 
 
 Operation:
