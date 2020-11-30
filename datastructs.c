@@ -46,8 +46,8 @@ void insert_word (TokenList **token_list, const char *word, double freq) {
         *token_list = new_token;
         return;
     }
-
     while (curr->next != NULL) {
+        // inserts alphabetically by comparing the word parameter with the word of the next struct in the TokenList LL
         if (strcmp(word, (curr->next)->word) < 0) {
             break;
         }
@@ -163,7 +163,7 @@ void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double
         *output_list = new_list;
         return;
     }
-    //insertion sort from smallest to greatest
+    //insertion sort from smallest to greatest total number of tokens between the two files
     while (curr->next != NULL) {
         if (new_list->sum < curr->next->sum) {
             break;
