@@ -108,6 +108,10 @@ void insert_file(FileList **file_list, TokenList *token_list, const char *file_n
     list->next = new_token;
 }
 
+/*
+Creates and returns a pointer to a new OutputList object for the given pair of files and their calculated 
+Jensen distance. malloc and strcpy file_names for each file so that double freeing will not occur.
+ */
 OutputList *new_outlist(FileList *f1, FileList *f2, double jensen) {
     OutputList *new_list = (OutputList*)malloc(sizeof(OutputList));
 
@@ -123,6 +127,9 @@ OutputList *new_outlist(FileList *f1, FileList *f2, double jensen) {
     return new_list;
 }
 
+/*
+Given OutputList linked list head, free all OutputLists in the linked list to avoid memory leaks
+ */
 void free_output(OutputList *ol) {
     OutputList *p = ol;
     OutputList *tmp;
@@ -135,6 +142,10 @@ void free_output(OutputList *ol) {
     }
 }
 
+/*
+Inserts a new OutputList for the given file parameters and Jensen distance to the OutputList link list parameter. 
+Uses insertion sort to keep the output_list sorted from least number of total tokens to most number of total tokens.
+ */
 void insert_output (OutputList **output_list, FileList *f1, FileList *f2, double jensen) {
     OutputList *curr = *output_list;
     OutputList *new_list = new_outlist(f1, f2, jensen);
