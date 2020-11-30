@@ -32,6 +32,31 @@ void free_toklist(TokenList *tl) {
 }
 
 /* 
+Creates and inserts new TokenList instance in linked list corresponding to the token_list parameter double pointer
+Sets word and frequency accordingly, while placing TokenList such that the linked list remains in alphabetical
+order. Can be called repeatedly to create a TokenList linked list to store tokens for a file
+ */
+void insert_word (TokenList **token_list, const char *word, double freq) {
+    TokenList *new_token = new_toklist(freq, word);
+    TokenList *curr = *token_list;
+    if (curr == NULL || strcmp(word, curr->word) < 0) {
+        new_token->next = curr;
+        *token_list = new_token;
+        return;
+    }
+
+    while (curr->next != NULL) {
+        if (strcmp(word, (curr->next)->word) < 0) {
+            break;
+        }
+        curr = curr->next;
+    }
+
+    new_token->next = curr->next;
+    curr->next = new_token;
+}
+
+/* 
 Creates and returns the pointer to a new FileList object, and sets the total token count,
 TokenList linked list head and file name accordingly. strcpy() is used to ensure changes 
 to the parameter word will not affect new_token->word and to avoid double free()ing
@@ -61,31 +86,6 @@ void free_filelist(FileList *fl) {
         free(p);
         p = tmp;
     }
-}
-
-/* 
-Creates and inserts new TokenList instance in linked list corresponding to the token_list parameter double pointer
-Sets word and frequency accordingly, while placing TokenList such that the linked list remains in alphabetical
-order. Can be called repeatedly to create a TokenList linked list to store tokens for a file
- */
-void insert_word (TokenList **token_list, const char *word, double freq) {
-    TokenList *new_token = new_toklist(freq, word);
-    TokenList *curr = *token_list;
-    if (curr == NULL || strcmp(word, curr->word) < 0) {
-        new_token->next = curr;
-        *token_list = new_token;
-        return;
-    }
-
-    while (curr->next != NULL) {
-        if (strcmp(word, (curr->next)->word) < 0) {
-            break;
-        }
-        curr = curr->next;
-    }
-
-    new_token->next = curr->next;
-    curr->next = new_token;
 }
 
 /* 
