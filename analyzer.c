@@ -6,7 +6,11 @@
 #include "analyzer.h"
 #include "datastructs.h"
 
-
+/*
+Create and calculate new mean distribution given two TokenList linked list parameters. Mean distribution
+is a merger of the two parameters with the new frequencies being the average between shared tokens and half of 
+individual tokens.
+ */
 TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
     TokenList *avg_list = malloc(sizeof(TokenList));
@@ -62,6 +66,10 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
     return ret;
 }
 
+/*
+Calculates and returns the Kullbeck distance given the mean distrubtion and the probability 
+distribution for a given word frequency linked list.
+ */
 double kullbeck(TokenList *mean_list, TokenList *dist_list) {
     double result = 0;
     while (dist_list != NULL) {
@@ -74,10 +82,16 @@ double kullbeck(TokenList *mean_list, TokenList *dist_list) {
     return result;
 }
 
+/*
+Calculates and returns the Jensen distance given the Kullbeck distances for two files.
+ */
 double jensen(double a, double b) {
     return (a+b)/2;
 }
 
+/*
+Outputs all OutputTokens in the linked list and prints the Jensen distance with the corresponding color code.
+ */
 void output(double j, const char *file1, const char *file2) {
     if (0 <= j && j <= 0.1) {
         printf("\033[0;31m"); //red
@@ -102,6 +116,11 @@ void output(double j, const char *file1, const char *file2) {
     printf("\"%s\" and \"%s\"\n", file1, file2);
 }
 
+/*
+Implements methods in datastructs.c and analyzer.c to create every possible file pair from the FileList linked
+list parameter, calculate the Kullbeck and Jensen distances, and output color coded Jensen distances and 
+file names from lowest to greatest number of tokens.
+ */
 void analyze(FileList* files) {
     OutputList* final_output = NULL;
 
