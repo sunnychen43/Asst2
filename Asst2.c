@@ -138,5 +138,6 @@ int main(int argc, char **argv) {
     pthread_mutex_destroy(&lock);
 
     analyze(master);  // run analysis on all files
+    
     free_filelist(master);
 }
