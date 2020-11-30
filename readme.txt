@@ -17,6 +17,7 @@ Included Files:
 
 Usage:
  > make && ./detector "."  (runs program on current directory)
+ > make && ./detector "C:\User\Name\filepath" (runs program on indicated file path)
 
 
 Operation:
