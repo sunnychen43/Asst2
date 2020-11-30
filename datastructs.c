@@ -46,8 +46,8 @@ void insert_word (TokenList **token_list, const char *word, double freq) {
         *token_list = new_token;
         return;
     }
-
     while (curr->next != NULL) {
+        // inserts alphabetically by comparing the word parameter with the word of the next struct in the TokenList LL
         if (strcmp(word, (curr->next)->word) < 0) {
             break;
         }
