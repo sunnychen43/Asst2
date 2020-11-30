@@ -7,9 +7,8 @@
 #include "datastructs.h"
 
 /*
-Create and calculate new mean distribution given two TokenList linked list parameters. Mean distribution
-is a merger of the two parameters with the new frequencies being the average between shared tokens and half of 
-individual tokens.
+Create and calculate new mean distribution given two TokenList linked list parameters. mean_dist merges the two TokenList linked list parameters with the
+new frequencies being the average between shared tokens and half of individual tokens while maintaining alphabetical order
  */
 TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
@@ -19,13 +18,14 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
     while (list_1 != NULL && list_2 != NULL) {
         TokenList *new_token;
-
+        // List 1 has a word token alphabetically before List 2's word, so List 1's word is added to the mean_dist and List 1 is incremented.
         if (strcmp(list_1->word, list_2->word) < 0) {
             new_token = new_toklist(list_1->freq/2, list_1->word);
             curr->next = new_token;
 
             list_1 = list_1->next;
         }
+        // List 1 and List 2 share the same word token, it's frequency is calculated and it is added to mean_dist and both lists are incremented.
         else if (strcmp(list_1->word, list_2->word) == 0) {
             new_token = new_toklist((list_1->freq+list_2->freq)/2, list_1->word);
             curr->next = new_token;
@@ -33,6 +33,7 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
             list_1 = list_1->next;
             list_2 = list_2->next;
         }
+        // List 2 has a word token alphabetically before List 1's word, so List 2's word is added to the mean_dist and List 2 is incremented.
         else {
             new_token = new_toklist(list_2->freq/2, list_2->word);
             curr->next = new_token;
@@ -42,7 +43,7 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
         curr = curr->next;
     }
-
+    // Finishes incrementing through List 1 since List 2 is at null
     while (list_1 != NULL) {
         TokenList *new_token = new_toklist(list_1->freq/2, list_1->word);
 
@@ -51,6 +52,7 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
         curr = curr->next;
     }
+    // Finishes incrementing through List 2 since List 1 is at null
     while (list_2 != NULL) {
         TokenList *new_token = new_toklist(list_2->freq/2, list_2->word);
 
@@ -59,7 +61,7 @@ TokenList *mean_dist(TokenList *list_1, TokenList *list_2) {
 
         curr = curr->next;
     }
-
+    // Returns avg_list->next because the head to the mean distrubution list is stored in avg_list->next
     TokenList *ret = avg_list->next;
     free(avg_list);
 
@@ -111,9 +113,9 @@ void output(double j, const char *file1, const char *file2) {
     else {
         printf("\033[0;37m"); //white
     }
-    printf("%f ", j);
-    printf("\033[0m");
-    printf("\"%s\" and \"%s\"\n", file1, file2);
+    printf("%f ", j); //prints JSD
+    printf("\033[0m"); //resets font color to default
+    printf("\"%s\" and \"%s\"\n", file1, file2); //prints file names
 }
 
 /*
@@ -123,22 +125,25 @@ file names from lowest to greatest number of tokens.
  */
 void analyze(FileList* files) {
     OutputList* final_output = NULL;
-
+    //files is the first FileList struct to be compared
     while (files != NULL) {
+        //subfiles is the second FileList struct to be compared
         FileList* subfiles = files->next;
         while (subfiles != NULL) {
+            //mean distrubtion is calculated
             TokenList* result = mean_dist(files->token_list, subfiles->token_list);
+            //kullbeck distances are calculated
             double a = kullbeck(result, files->token_list);
             double b = kullbeck(result, subfiles->token_list);
             free_toklist(result);
-
+            //add output for this file pair to final_output, the linked list of all outputs
             insert_output(&final_output, files, subfiles, jensen(a,b));
             subfiles = subfiles->next;
         }
         files = files->next;
     }
 
-    // print
+    // print all structs stored in the final_output linked list
     OutputList *curr = final_output;
     while (curr != NULL) {
         output(curr->jensen, curr->file1, curr->file2);
